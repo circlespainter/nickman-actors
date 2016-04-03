@@ -1,0 +1,56 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+group               = 'com.theliosapm.actors'
+version             = '1.0-SNAPSHOT'
+status              = 'integration'
+description         = 'TODO - Pls. edit - Gradle bootstrap project for Quasar'
+
+ext.classifier      = ':jdk8' // ':'
+sourceCompatibility = 1.8     // 1.7
+targetCompatibility = 1.8     // 1.7
+
+ext.quasarVer       = '0.7.4'
+ext.junitVer        = '4.12'
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+configurations {
+    quasar
+}
+
+configurations.all {
+    resolutionStrategy {
+        failOnVersionConflict()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "co.paralleluniverse:quasar-core:${quasarVer}${classifier}"
+    compile "co.paralleluniverse:quasar-actors:${quasarVer}"
+
+    quasar "co.paralleluniverse:quasar-core:${quasarVer}${classifier}@jar"
+
+    testCompile "junit:junit:$junitVer"
+}
+
+mainClassName = "com.heliosapm.actors.ActorManager"
+
+tasks.withType(Test) {
+    jvmArgs "-javaagent:${configurations.quasar.singleFile}" // =v, =d
+}
+
+applicationDefaultJvmArgs = [
+    "-Dco.paralleluniverse.fibers.detectRunawayFibers=false",
+    "-javaagent:${configurations.quasar.singleFile}" // =v, =d
+]
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
+defaultTasks 'run'
